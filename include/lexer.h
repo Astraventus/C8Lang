@@ -89,6 +89,6 @@ Token lexer_next(Lexer* l);
     For debugging.
     Return the name of the token.w
 */
-const char* token_type_name(Token t);
+const char* token_type_name(TokenType t);
 
 #endif LEXER_H

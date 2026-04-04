@@ -54,7 +54,7 @@ static Token expect(Parser *p, TokenType tt) {
 static void expect_end(Parser *p) {
     if (p->current.type == TOKEN_EOF) return;
     if (p->current.type == TOKEN_NEWLINE) { advance(p); return; }
-    error_fatal(p->current.line, "Expected EOF or newline, got %s", token_type_name(p->current));
+    error_fatal(p->current.line, "Expected EOF or newline, got %s", token_type_name(p->current.type));
 }
 
 /*
@@ -85,7 +85,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.assign_imm.imm = (uint8_t)p->current.value.number;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected register or number after '=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register or number after '=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -108,7 +108,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.add_imm.imm = p->current.value.number;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected register or number after '+=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register or number after '+=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -122,7 +122,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.sub_reg.src = p->current.value.reg;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected register after '-=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register after '-=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -135,7 +135,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.bitwise.dst = x;
             node.bitwise.src = p->current.value.reg;
         } else {
-            error_fatal(p->current.line, "expected register after '|=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register after '|=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -149,7 +149,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.bitwise.src = p->current.value.reg;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected register after '&=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register after '&=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -163,7 +163,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.bitwise.src = p->current.value.reg;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected register after '^=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected register after '^=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -179,7 +179,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.shift.reg = x;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected number after '<<=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected number after '<<=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -195,7 +195,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.shift.reg = x;
             advance(p);
         } else {
-            error_fatal(p->current.line, "expected number after '>>=', got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected number after '>>=', got %s", token_type_name(p->current.type));
         }
     }
 
@@ -224,7 +224,7 @@ static ASTNode parse_if(Parser *p, int line) {
         is_neq = 1;
         advance(p);
     } else {
-        error_fatal(p->current.line, "expected '==' or '!=' after register in if, got %s", token_type_name(p->current));
+        error_fatal(p->current.line, "expected '==' or '!=' after register in if, got %s", token_type_name(p->current.type));
     }
 
     if (p->current.type == TOKEN_REGISTER) {
@@ -264,7 +264,7 @@ static ASTNode parse_if(Parser *p, int line) {
         }
 
     } else {
-        error_fatal(p->current.line, "expected register or number after condition operator, got %s", token_type_name(p->current));
+        error_fatal(p->current.line, "expected register or number after condition operator, got %s", token_type_name(p->current.type));
     }
 
     return node;
@@ -289,7 +289,7 @@ static ASTNode parse_set_i(Parser *p, int line) {
         strncpy(node.set_i.label, p->current.value.ident, 32);
         advance(p);
     } else {
-        error_fatal(line, "expected address or sprite name after 'I =', got %s", token_type_name(p->current));
+        error_fatal(line, "expected address or sprite name after 'I =', got %s", token_type_name(p->current.type));
     }
 
     return node;
@@ -388,7 +388,7 @@ static ASTNode parse_sprite_def(Parser *p, int line) {
         if (p->current.type == TOKEN_NEWLINE) { advance(p); continue; }
 
         if (p->current.type != TOKEN_NUMBER) {
-            error_fatal(p->current.line, "expected byte value in sprite body, got %s", token_type_name(p->current));
+            error_fatal(p->current.line, "expected byte value in sprite body, got %s", token_type_name(p->current.type));
         }
         
         if (node.sprite.count >= 15) {
