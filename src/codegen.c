@@ -1,6 +1,6 @@
-#include "codegen.h"
-#include "symtable.h"
-#include "include/error.h"
+#include "../include/codegen.h"
+#include "../include/symtable.h"
+#include "../include/error.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@ void rom_emit(ROM *rom, uint16_t instr) {
 }
 
 
-void rom_emit(ROM *rom, uint8_t byte) {
+void rom_emit_byte(ROM *rom, uint8_t byte) {
     if (rom->size + 1 > ROM_MAX_SIZE) {
         error_fatal(0, "program exceeds maximum ROM size (0xFFF)");
     }
@@ -48,7 +48,7 @@ void rom_emit(ROM *rom, uint8_t byte) {
 */
 
 static void pass1(const Program* prog, SymTable* st) {
-    uint16_t offset = 0x200;
+    uint16_t offset = 0;
 
     for (int i = 0; i < prog->count; i++) {
         const ASTNode *n = &prog->nodes[i];

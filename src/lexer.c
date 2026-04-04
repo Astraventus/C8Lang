@@ -1,5 +1,5 @@
-#include "lexer.h"
-#include "src/error.c"
+#include "../include/lexer.h"
+#include "../include/error.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -26,7 +26,7 @@ static void skip_spaces(Lexer* l) {
 }
 
 static void skip_comments(Lexer* l) {
-    while (peek(l) != '\n' || peek(l) != '\0') {
+    while (peek(l) != '\n' && peek(l) != '\0') {
         advance(l);
     }
 }
@@ -42,7 +42,7 @@ static Token lex_register(Lexer* l, int line) {
 
     char c = peek(l);
     if (!isxdigit((unsigned char) c)) {
-        error_fatal(line, "Expected hex digit after 'v', got %c", c, line);
+        error_fatal(line, "Expected hex digit after 'v', got %c", c);
     }
 
     advance(l);
@@ -86,16 +86,17 @@ static Token lex_number(Lexer* l, int line) {
         return t;
     } else {
         while (isdigit(peek(l)) && i < 14) {
-            buf[i++] = advance(i);
+            buf[i++] = advance(l);
         }
     }
     buf[i] = '\0';
 
-    t.value.number = (uint16_t)strtol(buf, NULL, 0);
-    if (t.value.number < 0 || t.value.number > 0xFFFF) {
-        error_fatal(line, "Out of range number (expected in range of 0x0-0xFFFF) - %x", t.value.number);
+    long v = strtol(buf, NULL, 0);
+    if (v < 0 || v > 0xFFFF) {
+        error_fatal(line, "Out of range number (expected in range of 0x0-0xFFFF) - %x", v);
     }
 
+    t.value.number = (uint16_t)v;
     return t;
 }
 
@@ -127,7 +128,7 @@ static Token lex_ident(Lexer* l, int line, char first) {
     if (strcmp(buf, "soundset")  == 0) { t.type = TOKEN_SOUNDSET;  return t; }
     if (strcmp(buf, "I")         == 0) {
         t.type = TOKEN_IDENT;
-        strncpy(t.value.ident, "I", sizeof(t.value.ident));
+        strncpy(t.value.ident, "I", 32);
         return t;
     }
 
@@ -190,7 +191,7 @@ Token lexer_next(Lexer* l) {
         /*  numbers     */
         if (isdigit((unsigned char) c)) {
             l->pos--;
-            l->line - line;
+            l->line = line;
             return lex_number(l, line);
         }
 

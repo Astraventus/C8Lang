@@ -58,7 +58,7 @@ typedef struct {
     union {
         uint8_t reg;
         uint16_t number;
-        const char* ident[32];
+        char ident[32];
     } value;
 } Token;
 
@@ -87,8 +87,8 @@ Token lexer_next(Lexer* l);
 
 /*
     For debugging.
-    Return the name of the token.w
+    Return the name of the token.
 */
 const char* token_type_name(TokenType t);
 
-#endif LEXER_H
+#endif

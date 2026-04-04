@@ -7,4 +7,4 @@ void error_fatal(int line, const char *fmt, ...);
 /* Print a warning (does not exit). */
 void error_warn(int line, const char *fmt, ...);
 
-#endif ERROR_H
+#endif

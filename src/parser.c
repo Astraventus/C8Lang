@@ -1,5 +1,5 @@
-#include "parser.h"
-#include "include/error.h"
+#include "../include/parser.h"
+#include "../include/error.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -30,9 +30,7 @@ void program_free(Program *prog) {
 */
 
 static void advance(Parser *p) {
-    do {
-        p->current = lexer_next(p->lexer);
-    } while (p->current.type == TOKEN_NEWLINE);
+    p->current = lexer_next(p->lexer);
 }
 
 static void skip_newlines(Parser *p) {
@@ -43,8 +41,8 @@ static void skip_newlines(Parser *p) {
 
 static Token expect(Parser *p, TokenType tt) {
     if (p->current.type != tt) {
-        error_fatal(p->current.line, "expected %s, got %s", 
-            tt, p->current.type);
+        error_fatal(p->current.line, "expected %s, got %s",
+            token_type_name(tt), token_type_name(p->current.type));
     }
     Token token = p->current;
     advance(p);
@@ -75,7 +73,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
             node.assign_reg.dst = x;
             node.assign_reg.src = p->current.value.reg;
             advance(p);
-        } else if (p->current.type = TOKEN_NUMBER) {
+        } else if (p->current.type == TOKEN_NUMBER) {
             /* Vx = IMM */
             if (p->current.value.number > 255) {
                 error_fatal(p->current.line, "Immediate %u exceeds 255", p->current.value.number);
@@ -89,7 +87,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type == TOKEN_PLUS_EQUALS) {
+    else if (p->current.type == TOKEN_PLUS_EQUALS) {
         advance(p);
 
         if (p->current.type == TOKEN_REGISTER) {
@@ -112,7 +110,7 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type == TOKEN_MINUS_EQUALS) {
+    else if (p->current.type == TOKEN_MINUS_EQUALS) {
         advance(p);
 
         if (p->current.type == TOKEN_REGISTER) {
@@ -126,23 +124,24 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type == TOKEN_OR_EQUALS) {
+    else if (p->current.type == TOKEN_OR_EQUALS) {
         advance(p);
 
-        if (p->current.type = TOKEN_REGISTER) {
+        if (p->current.type == TOKEN_REGISTER) {
             /* vX |= xY */
             node.type = NODE_OR_REG;
             node.bitwise.dst = x;
             node.bitwise.src = p->current.value.reg;
+            advance(p);
         } else {
             error_fatal(p->current.line, "expected register after '|=', got %s", token_type_name(p->current.type));
         }
     }
 
-    if (p->current.type == TOKEN_AND_EQUALS) {
+    else if (p->current.type == TOKEN_AND_EQUALS) {
         advance(p);
 
-        if (p->current.type = TOKEN_REGISTER) {
+        if (p->current.type == TOKEN_REGISTER) {
             /* vX &= vY */
             node.type = NODE_AND_REG;
             node.bitwise.dst = x;
@@ -153,10 +152,10 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type = TOKEN_XOR_EQUALS) {
+    else if (p->current.type == TOKEN_XOR_EQUALS) {
         advance(p);
 
-        if (p->current.type = TOKEN_REGISTER) {
+        if (p->current.type == TOKEN_REGISTER) {
             /* vX ^= vY */
             node.type = NODE_XOR_REG;
             node.bitwise.dst = x;
@@ -167,10 +166,10 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type = TOKEN_SHL_EQUALS) {
+    else if (p->current.type == TOKEN_SHL_EQUALS) {
         advance(p);
 
-        if (p->current.type = TOKEN_NUMBER) {
+        if (p->current.type == TOKEN_NUMBER) {
             /* vX <<= 1 */
             if (p->current.value.number != 1) {
                 error_fatal(p->current.line, "Immediate %u during shift can only be 1", p->current.value.number);
@@ -183,10 +182,10 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         }
     }
 
-    if (p->current.type = TOKEN_SHR_EQUALS) {
+    else if (p->current.type == TOKEN_SHR_EQUALS) {
         advance(p);
 
-        if (p->current.type = TOKEN_NUMBER) {
+        if (p->current.type == TOKEN_NUMBER) {
             /* vX >>= 1 */
             if (p->current.value.number != 1) {
                 error_fatal(p->current.line, "Immediate %u during shift can only be 1", p->current.value.number);
@@ -197,6 +196,11 @@ static ASTNode parse_register_stmt(Parser *p, Token reg) {
         } else {
             error_fatal(p->current.line, "expected number after '>>=', got %s", token_type_name(p->current.type));
         }
+    }
+
+    else {
+    error_fatal(reg.line, "expected assignment or operator after register, got %s",
+                token_type_name(p->current.type)); 
     }
 
     return node;
@@ -220,7 +224,7 @@ static ASTNode parse_if(Parser *p, int line) {
     int is_neq = 0;
     if (p->current.type == TOKEN_EQEQ) {
         advance(p);
-    } else if (p->current.type = TOKEN_NEQ) {
+    } else if (p->current.type == TOKEN_NEQ) {
         is_neq = 1;
         advance(p);
     } else {
@@ -281,11 +285,11 @@ static ASTNode parse_set_i(Parser *p, int line) {
     if (p->current.type == TOKEN_NUMBER) {
         uint16_t v = p->current.value.number;
         if (v > 0xFFF) {
-            error_fatal(line, "adsress 0x%X exceeds xFFF", v);
+            error_fatal(line, "address 0x%X exceeds xFFF", v);
         }
         node.set_i.addr = v;
         advance(p);
-    } else if (p->current.type = TOKEN_IDENT) {
+    } else if (p->current.type == TOKEN_IDENT) {
         strncpy(node.set_i.label, p->current.value.ident, 32);
         advance(p);
     } else {
@@ -375,7 +379,7 @@ static ASTNode parse_sprite_def(Parser *p, int line) {
     node.sprite.count = 0;
 
     Token name = expect(p, TOKEN_IDENT);
-    STRNCPY(node.sprite.name, name.value.ident, 32);
+    strncpy(node.sprite.name, name.value.ident, 32);
 
     while (p->current.type == TOKEN_NEWLINE) advance(p);
     expect(p, TOKEN_LBRACE);
@@ -453,12 +457,12 @@ Program parser_parse(Parser *p) {
                     node.line = line;
                     strncpy(node.label.name, name, 32);
                     program_push(&prog, node);
-                } else if (strcmp(p->current.value.ident, "I") == 0) {
+                } else if (strcmp(name, "I") == 0) {
                     node = parse_set_i(p, line);
                     expect_end(p);
                     program_push(&prog, node);
                 } else {
-                    error_fatal(line, "Unexpected identifier '%s", p->current.value.ident);
+                    error_fatal(line, "Unexpected identifier '%s'", p->current.value.ident);
                 }
                 break;
             }
@@ -476,6 +480,7 @@ Program parser_parse(Parser *p) {
             {
                 advance(p);
                 node = parse_if(p, line);
+                program_push(&prog, node);
                 expect_end(p);
                 break;
             }

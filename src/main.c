@@ -1,8 +1,8 @@
-#include "include/lexer.h"
-#include "include/parser.h"
-#include "include/error.h"
-#include "include/codegen.h"
-#include "include/symtable.h"
+#include "../include/lexer.h"
+#include "../include/parser.h"
+#include "../include/error.h"
+#include "../include/codegen.h"
+#include "../include/symtable.h"
 
 #include <stdio.h>
 #include <stdlib.h>

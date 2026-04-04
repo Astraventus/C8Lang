@@ -1,5 +1,5 @@
-#include "include/symtable.h"
-#include "error.h"
+#include "../include/symtable.h"
+#include "../include/error.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -25,7 +25,7 @@ void symtable_define(SymTable* st, const char* name, uint16_t addr, int line) {
 }
 
 uint16_t symtable_lookup(SymTable* st, const char* name, int line) {
-    for (int i = 0; st->count; i++) {
+    for (int i = 0; i < st->count; i++) {
         if (strcmp(st->entries[i].name, name) == 0) {
             return st->entries[i].address;
         }
