@@ -215,6 +215,15 @@ static ASTNode parse_goto(Parser *p, int line) {
     return node;
 }
 
+static ASTNode parse_call(Parser *p, int line) {
+    ASTNode node;
+    node.line = line;
+    node.type = NODE_CALL;
+    Token t = expect(p, TOKEN_IDENT);
+    strncpy(node.call.target, t.value.ident, 32);
+    return node;
+}
+
 static ASTNode parse_if(Parser *p, int line) {
     ASTNode node;
     node.line = line;
@@ -476,6 +485,25 @@ Program parser_parse(Parser *p) {
                 break;
             }
 
+            case TOKEN_CALL:
+            {
+                advance(p);
+                node = parse_call(p, line);
+                expect_end(p);
+                program_push(&prog, node);
+                break;
+            }
+            
+            case TOKEN_RET:
+            {
+                advance(p);
+                node.type = NODE_RET;
+                node.line = line;
+                expect_end(p);
+                program_push(&prog, node);
+                break;
+            }
+
             case TOKEN_IF:
             {
                 advance(p);
@@ -651,6 +679,8 @@ void program_dump(const Program *prog) {
             case NODE_ADD_REG:    printf("v%X += v%X",           n->add_reg.dst,    n->add_reg.src);    break;
             case NODE_SUB_REG:    printf("v%X -= v%X",           n->sub_reg.dst,    n->sub_reg.src);    break;
             case NODE_GOTO:       printf("-> %s",                 n->jump.target);                       break;
+            case NODE_CALL:       printf("-> %s",                 n->call.target);                       break;
+            case NODE_RET:        printf("ret");                                                         break;
             case NODE_IF_EQ_IMM:  printf("v%X==0x%02X -> %s",   n->if_eq_imm.reg, n->if_eq_imm.imm, n->if_eq_imm.target); break;
             case NODE_IF_EQ_REG:  printf("v%X==v%X -> %s",      n->if_eq_reg.rx,  n->if_eq_reg.ry,  n->if_eq_reg.target); break;
             case NODE_SET_I:

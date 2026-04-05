@@ -126,6 +126,17 @@ static void pass2(const Program *prog, SymTable *st, ROM *rom) {
                 rom_emit(rom, 0x1000 | (addr & 0xFFF));
                 break;
             }
+            
+            case NODE_CALL: {       /* 2NNN: call subroutine */
+                uint16_t addr = symtable_lookup(st, n->call.target, n->line);
+                rom_emit(rom, 0x2000 | (addr & 0xFFF));
+                break;
+            }
+
+            case NODE_RET: {        /* 00EE: Return from a subroutine. */
+                rom_emit(rom, 0x00EE);
+                break;
+            }
 
             /* === Memory (I register) === */
             case NODE_SET_I: {       /* ANNN: I = NNN (literal or label) */

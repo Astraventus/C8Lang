@@ -115,6 +115,8 @@ static Token lex_ident(Lexer* l, int line, char first) {
     buf[i] = '\0';
 
     if (strcmp(buf, "goto")      == 0) { t.type = TOKEN_GOTO;      return t; }
+    if (strcmp(buf, "call")      == 0) { t.type = TOKEN_CALL;      return t; }
+    if (strcmp(buf, "ret")       == 0) { t.type = TOKEN_RET;       return t; }
     if (strcmp(buf, "if")        == 0) { t.type = TOKEN_IF;        return t; }
     if (strcmp(buf, "store")     == 0) { t.type = TOKEN_STORE;     return t; }
     if (strcmp(buf, "load")      == 0) { t.type = TOKEN_LOAD;      return t; }
@@ -261,6 +263,8 @@ const char *token_type_name(TokenType t) {
         case TOKEN_REGISTER:     return "REGISTER";
         case TOKEN_IDENT:        return "IDENT";
         case TOKEN_GOTO:         return "goto";
+        case TOKEN_CALL:         return "call";
+        case TOKEN_RET:          return "ret";
         case TOKEN_IF:           return "if";
         case TOKEN_STORE:        return "store";
         case TOKEN_LOAD:         return "load";

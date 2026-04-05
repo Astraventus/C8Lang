@@ -30,8 +30,6 @@ C8L keeps things simple because CHIP-8 is simple.
 
 **Labels are just numbers** — When you write `goto start`, the compiler looks up where `start:` is and replaces it with the actual memory address (like `0x202`). Same for sprites — the name becomes the address of the first byte.
 
-**No stack, no functions** — CHIP-8 has a call stack, but C8L doesn't touch it. No subroutines, no local variables, no recursion. Just jumps and registers, same as writing raw assembly but with nicer syntax.
-
 That's basically it. The compiler does two passes: first to count bytes and note where labels are, second to actually write the bytes. No optimization, no intermediate representation.
 
 ## License

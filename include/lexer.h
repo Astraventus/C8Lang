@@ -15,6 +15,8 @@ typedef enum {
 
     /*  Keywords                */
     TOKEN_GOTO,             /*  goto                            */
+    TOKEN_CALL,
+    TOKEN_RET,
     TOKEN_IF,               /*  if                              */
     TOKEN_STORE,            /*  store                           */
     TOKEN_LOAD,             /*  load                            */

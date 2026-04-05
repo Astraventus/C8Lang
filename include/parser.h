@@ -23,6 +23,8 @@ typedef enum {
     NODE_SHL,           /* vX <<= 1    — 8XYE (Y ignored)      */
     /* control flow */
     NODE_GOTO,          /* goto label                          */
+    NODE_CALL,          /* call label                          */
+    NODE_RET,           /* ret                                 */
     NODE_IF_EQ_IMM,     /* if vX == number goto label          */
     NODE_IF_EQ_REG,     /* if vX == vY goto label              */
     NODE_IF_NEQ_IMM,    /* if vX != number goto label  — 4XNN  */
@@ -77,6 +79,9 @@ typedef struct {
 
         /* NODE_GOTO */
         struct { char target[32]; } jump;
+
+        /* NODE_CALL */
+        struct { char target[32]; } call; 
 
         /* NODE_IF_EQ_IMM */
         struct { uint8_t reg; uint8_t imm; char target[32]; } if_eq_imm;

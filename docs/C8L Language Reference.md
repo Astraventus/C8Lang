@@ -59,7 +59,9 @@ if vX == vY goto label        # jump if vX equals vY
 if vX != N  goto label        # jump if vX not equals immediate
 if vX != vY goto label        # jump if vX not equals vY
 ```
- 
+```
+call label                    # call subroutine
+ret                           # return from subroutine
 ---
  
 ## Input
