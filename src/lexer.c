@@ -126,6 +126,7 @@ static Token lex_ident(Lexer* l, int line, char first) {
     if (strcmp(buf, "delayset")  == 0) { t.type = TOKEN_DELAYSET;  return t; }
     if (strcmp(buf, "delayget")  == 0) { t.type = TOKEN_DELAYGET;  return t; }
     if (strcmp(buf, "soundset")  == 0) { t.type = TOKEN_SOUNDSET;  return t; }
+    if (strcmp(buf, "cls")       == 0) { t.type = TOKEN_CLS;       return t; }
     if (strcmp(buf, "I")         == 0) {
         t.type = TOKEN_IDENT;
         strncpy(t.value.ident, "I", 32);
@@ -271,6 +272,7 @@ const char *token_type_name(TokenType t) {
         case TOKEN_DELAYSET:     return "delayset";
         case TOKEN_DELAYGET:     return "delayget";
         case TOKEN_SOUNDSET:     return "soundset";
+        case TOKEN_CLS:          return "cls";
         case TOKEN_EQUALS:       return "=";
         case TOKEN_PLUS_EQUALS:  return "+=";
         case TOKEN_MINUS_EQUALS: return "-=";

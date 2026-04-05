@@ -110,6 +110,12 @@ I = name          # point I at sprite data
 draw vX vY N      # draw N rows of sprite at screen position (vX, vY)
 ```
  
+To clean screen you shall use `cls` word:
+
+```
+cls
+```
+
 ---
  
 ## Memory

@@ -217,6 +217,10 @@ static void pass2(const Program *prog, SymTable *st, ROM *rom) {
             case NODE_SOUNDSET:      /* FX18: sound timer = vX */
                 rom_emit(rom, 0xF018 | (n->timer_set.reg << 8));
                 break;
+
+            case NODE_CLS:
+                rom_emit(rom, 0x00E0);   // CHIP-8 clear screen
+                break;  
         }
     }
 }

@@ -462,7 +462,7 @@ Program parser_parse(Parser *p) {
                     expect_end(p);
                     program_push(&prog, node);
                 } else {
-                    error_fatal(line, "Unexpected identifier '%s'", p->current.value.ident);
+                    error_fatal(line, "Unexpected identifier '%s'", name);
                 }
                 break;
             }
@@ -575,6 +575,16 @@ Program parser_parse(Parser *p) {
                 break;
             }
 
+            case TOKEN_CLS:
+            {
+                advance(p);
+                node.type = NODE_CLS;
+                node.line = line;
+                expect_end(p);
+                program_push(&prog, node);
+                break;
+            }
+
             case TOKEN_NEWLINE:
                 advance(p);
                 break;
@@ -623,6 +633,7 @@ const char *node_type_name(ASTNodeType t) {
         case NODE_DELAYSET:   return "DELAYSET";
         case NODE_DELAYGET:   return "DELAYGET";
         case NODE_SOUNDSET:   return "SOUNDSET";
+        case NODE_CLS:        return "CLS";
         default:              return "UNKNOWN";
     }
 }
@@ -670,6 +681,7 @@ void program_dump(const Program *prog) {
             case NODE_DELAYSET:   printf("delayset v%X",      n->timer_set.reg);                      break;
             case NODE_DELAYGET:   printf("delayget v%X",      n->timer_get.reg);                      break;
             case NODE_SOUNDSET:   printf("soundset v%X",      n->timer_set.reg);                      break;
+            case NODE_CLS:        printf("cls");                                                      break;
         }
         printf("\n");
     }

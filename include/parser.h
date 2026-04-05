@@ -38,6 +38,8 @@ typedef enum {
     NODE_WAITKEY,       /* waitkey vX  — FX0A                  */
     NODE_IFKEY,         /* ifkey vX goto label   — EX9E+1NNN   */
     NODE_IFNKEY,        /* ifnkey vX goto label  — EXA1+1NNN   */
+    /* Screen */
+    NODE_CLS,           /* Clear screen                        */
     /* timers */
     NODE_DELAYSET,      /* delayset vX — FX15                  */
     NODE_DELAYGET,      /* delayget vX — FX07                  */

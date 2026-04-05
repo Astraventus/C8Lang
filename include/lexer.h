@@ -5,6 +5,9 @@
 #include <stdint.h>
 
 typedef enum {
+    /*  Screen                  */
+    TOKEN_CLS,              /*  Clear screen                    */
+
     /*  Literals                */
     TOKEN_NUMBER,           /*  DEC: 42, HEX: 0x12              */
     TOKEN_REGISTER,         /*  v0-vf (represented as 1..15)    */
