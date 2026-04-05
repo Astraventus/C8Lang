@@ -48,6 +48,9 @@ typedef enum {
     TOKEN_LBRACE,           /*  { (sprite body open)            */
     TOKEN_RBRACE,           /*  } (sprite body close)           */
 
+    /*  Random                  */
+    TOKEN_RND,
+
     /*  Structured              */
     TOKEN_NEWLINE,          /*  logical end of statement        */
     TOKEN_EOF,              /*  end of the input                */

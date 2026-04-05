@@ -97,6 +97,14 @@ if v0 != 0 goto wait
 ```
  
 ---
+
+## Random Number Generation
+
+To generate number use `rnd`:
+```
+rnd vX kk       # vX - register where the value will be stored; kk - 8-bit value
+```
+---
  
 ## Graphics
  

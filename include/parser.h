@@ -46,6 +46,8 @@ typedef enum {
     NODE_DELAYSET,      /* delayset vX — FX15                  */
     NODE_DELAYGET,      /* delayget vX — FX07                  */
     NODE_SOUNDSET,      /* soundset vX — FX18                  */
+    /* random */
+    NODE_RND,           /* rnd Vx, byte                        */
 } ASTNodeType;
 
 typedef struct {
@@ -127,6 +129,9 @@ typedef struct {
 
         /* NODE_DELAYGET */
         struct { uint8_t reg; } timer_get;
+
+        /* NODE_RND */
+        struct { uint8_t reg; uint8_t byte; } random;
     };
 } ASTNode;
 

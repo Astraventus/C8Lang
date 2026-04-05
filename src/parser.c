@@ -365,6 +365,20 @@ static ASTNode parse_delayget(Parser *p, int line) {
     return node;
 }
 
+static ASTNode parse_random(Parser *p, int line) {
+    ASTNode node;
+    node.type = NODE_RND;
+    node.line = line;
+    Token r = expect(p, TOKEN_REGISTER);
+    Token n = expect(p, TOKEN_NUMBER);
+    if (n.value.number > 0xff) {
+        error_fatal(line, "Random byte exceeds the 0xFF");
+    }
+    node.random.reg = r.value.reg;
+    node.random.byte = n.value.number;
+    return node;
+}
+
 static ASTNode parse_draw(Parser *p, int line) {
     ASTNode node;
     node.type = NODE_DRAW;
@@ -602,6 +616,15 @@ Program parser_parse(Parser *p) {
                 program_push(&prog, node);
                 break;
             }
+            
+            case TOKEN_RND:
+            {
+                advance(p);
+                node = parse_random(p, line);
+                expect_end(p);
+                program_push(&prog, node);
+                break;
+            }
 
             case TOKEN_CLS:
             {
@@ -711,6 +734,7 @@ void program_dump(const Program *prog) {
             case NODE_DELAYSET:   printf("delayset v%X",      n->timer_set.reg);                      break;
             case NODE_DELAYGET:   printf("delayget v%X",      n->timer_get.reg);                      break;
             case NODE_SOUNDSET:   printf("soundset v%X",      n->timer_set.reg);                      break;
+            case NODE_RND:        printf("rnd v%X, %02X",      n->random.reg, n->random.byte);                      break;
             case NODE_CLS:        printf("cls");                                                      break;
         }
         printf("\n");
