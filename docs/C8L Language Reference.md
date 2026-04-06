@@ -63,10 +63,10 @@ if vX != vY goto label        # jump if vX not equals vY
 call label                    # call subroutine
 ret                           # return from subroutine
 
-if vX == N  goto label        # call if vX equals immediate
-if vX == vY goto label        # call if vX equals vY
-if vX != N  goto label        # call if vX not equals immediate
-if vX != vY goto label        # call if vX not equals vY
+if vX == N  call label        # call if vX equals immediate
+if vX == vY call label        # call if vX equals vY
+if vX != N  call label        # call if vX not equals immediate
+if vX != vY call label        # call if vX not equals vY
 ```
  
 ## Input
