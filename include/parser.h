@@ -85,17 +85,17 @@ typedef struct {
         /* NODE_CALL */
         struct { char target[32]; } call; 
 
-        /* NODE_IF_EQ_IMM */
-        struct { uint8_t reg; uint8_t imm; char target[32]; } if_eq_imm;
+        /* NODE_IF_EQ_IMM */ /* 0 - call, goto - 1 */
+        struct { uint8_t reg; uint8_t imm; char target[32]; int call_or_goto; } if_eq_imm;
 
-        /* NODE_IF_EQ_REG */
-        struct { uint8_t rx; uint8_t ry; char target[32]; } if_eq_reg;
+        /* NODE_IF_EQ_REG */ /* 0 - call, goto - 1 */
+        struct { uint8_t rx; uint8_t ry; char target[32]; int call_or_goto; } if_eq_reg;
 
-        /* NODE_IF_NEQ_IMM */
-        struct { uint8_t reg; uint8_t imm; char target[32]; } if_neq_imm;
+        /* NODE_IF_NEQ_IMM */ /* 0 - call, goto - 1 */
+        struct { uint8_t reg; uint8_t imm; char target[32]; int call_or_goto; } if_neq_imm;
 
-        /* NODE_IF_NEQ_REG */
-        struct { uint8_t rx; uint8_t ry; char target[32]; } if_neq_reg;
+        /* NODE_IF_NEQ_REG */ /* 0 - call, goto - 1 */
+        struct { uint8_t rx; uint8_t ry; char target[32]; int call_or_goto; } if_neq_reg;
         
         /* NODE_SET_I */
         struct { uint16_t addr; char label[32]; } set_i;
@@ -121,8 +121,8 @@ typedef struct {
         /* NODE_WAITKEY */
         struct { uint8_t reg; } waitkey;
         
-        /* NODE_IFKEY, NODE_IFNKEY */
-        struct { uint8_t reg; char target[32]; } key;
+        /* NODE_IFKEY, NODE_IFNKEY */ /* 0 - call, goto - 1 */
+        struct { uint8_t reg; char target[32]; int call_or_goto; } key;
 
         /* NODE_DELAYSET, NODE_SOUNDSET */
         struct { uint8_t reg; } timer_set;

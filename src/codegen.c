@@ -172,28 +172,44 @@ static void pass2(const Program *prog, SymTable *st, ROM *rom) {
             case NODE_IF_EQ_IMM: {   /* goto target if vX == NN */
                 uint16_t addr = symtable_lookup(st, n->if_eq_imm.target, n->line);
                 rom_emit(rom, 0x4000 | (n->if_eq_imm.reg << 8) | n->if_eq_imm.imm);  /* skip if vX != NN */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                if (n->if_eq_imm.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }
                 break;
             }
 
             case NODE_IF_EQ_REG: {   /* goto target if vX == vY */
                 uint16_t addr = symtable_lookup(st, n->if_eq_reg.target, n->line);
                 rom_emit(rom, 0x9000 | (n->if_eq_reg.rx << 8) | (n->if_eq_reg.ry << 4)); /* skip if vX != vY */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));
+                if (n->if_eq_reg.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }                
                 break;
             }
 
             case NODE_IF_NEQ_IMM: {  /* goto target if vX != NN */
                 uint16_t addr = symtable_lookup(st, n->if_neq_imm.target, n->line);
                 rom_emit(rom, 0x3000 | (n->if_neq_imm.reg << 8) | n->if_neq_imm.imm); /* skip if vX == NN */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));
+                if (n->if_neq_imm.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }
                 break;
             }
 
             case NODE_IF_NEQ_REG: {  /* goto target if vX != vY */
                 uint16_t addr = symtable_lookup(st, n->if_neq_reg.target, n->line);
                 rom_emit(rom, 0x5000 | (n->if_neq_reg.rx << 8) | (n->if_neq_reg.ry << 4)); /* skip if vX == vY */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));
+                if (n->if_neq_reg.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }                
                 break;
             }
 
@@ -205,14 +221,22 @@ static void pass2(const Program *prog, SymTable *st, ROM *rom) {
             case NODE_IFKEY: {       /* goto target if key[vX] is pressed */
                 uint16_t addr = symtable_lookup(st, n->key.target, n->line);
                 rom_emit(rom, 0xE0A1 | (n->key.reg << 8));  /* skip if NOT pressed */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));
+                if (n->key.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }   
                 break;
             }
 
             case NODE_IFNKEY: {      /* goto target if key[vX] is NOT pressed */
                 uint16_t addr = symtable_lookup(st, n->key.target, n->line);
                 rom_emit(rom, 0xE09E | (n->key.reg << 8));  /* skip if pressed */
-                rom_emit(rom, 0x1000 | (addr & 0xFFF));
+                if (n->key.call_or_goto) {
+                    rom_emit(rom, 0x1000 | (addr & 0xFFF));                         /* goto target */
+                } else {
+                    rom_emit(rom, 0x2000 | (addr & 0xFFF));                         /* call target */
+                }   
                 break;
             }
 

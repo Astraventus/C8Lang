@@ -49,6 +49,16 @@ static Token expect(Parser *p, TokenType tt) {
     return token;
 }
 
+static Token expect_either(Parser *p, TokenType tt1, TokenType tt2) {
+    if (p->current.type != tt1 && p->current.type != tt2) {
+        error_fatal(p->current.line, "expected %s or %s, got %s",
+            token_type_name(tt1), token_type_name(tt2), token_type_name(p->current.type));
+    }
+    Token token = p->current;
+    advance(p);
+    return token;
+}
+
 static void expect_end(Parser *p) {
     if (p->current.type == TOKEN_EOF) return;
     if (p->current.type == TOKEN_NEWLINE) { advance(p); return; }
@@ -230,6 +240,7 @@ static ASTNode parse_if(Parser *p, int line) {
 
     Token rx = expect(p, TOKEN_REGISTER);
 
+    int is_goto = 0;
     int is_neq = 0;
     if (p->current.type == TOKEN_EQEQ) {
         advance(p);
@@ -243,18 +254,21 @@ static ASTNode parse_if(Parser *p, int line) {
     if (p->current.type == TOKEN_REGISTER) {
         uint8_t ry = p->current.value.reg;
         advance(p);
-        expect(p, TOKEN_GOTO);
+        Token check_token = expect_either(p, TOKEN_GOTO, TOKEN_CALL);
+        if (check_token.type == TOKEN_GOTO) { is_goto = 1; }
         Token lbl = expect(p, TOKEN_IDENT);
         if (is_neq) {
             node.type = NODE_IF_NEQ_REG;
             node.if_neq_reg.rx = rx.value.reg;
             node.if_neq_reg.ry = ry;
             strncpy(node.if_neq_reg.target, lbl.value.ident, 32);
+            if (is_goto == 1) { node.if_neq_reg.call_or_goto = 1; } else { node.if_neq_reg.call_or_goto = 0; }
         } else {
             node.type = NODE_IF_EQ_REG;
             node.if_eq_reg.rx = rx.value.reg;
             node.if_eq_reg.ry = ry;
             strncpy(node.if_eq_reg.target, lbl.value.ident, 32);
+            if (is_goto == 1) { node.if_eq_reg.call_or_goto = 1; } else { node.if_eq_reg.call_or_goto = 0; }
         }
 
     } else if (p->current.type == TOKEN_NUMBER) {
@@ -262,18 +276,21 @@ static ASTNode parse_if(Parser *p, int line) {
         if (nn > 255)
             error_fatal(p->current.line, "immediate %u exceeds 255", nn);
         advance(p);
-        expect(p, TOKEN_GOTO);
+        Token check_token = expect_either(p, TOKEN_GOTO, TOKEN_CALL);
+        if (check_token.type == TOKEN_GOTO) { is_goto = 1; }        
         Token lbl = expect(p, TOKEN_IDENT);
         if (is_neq) {
             node.type = NODE_IF_NEQ_IMM;
             node.if_neq_imm.reg = rx.value.reg;
             node.if_neq_imm.imm = (uint8_t)nn;
             strncpy(node.if_neq_imm.target, lbl.value.ident, 32);
+            if (is_goto == 1) { node.if_neq_imm.call_or_goto = 1; } else { node.if_neq_imm.call_or_goto = 0; }
         } else {
             node.type = NODE_IF_EQ_IMM;
             node.if_eq_imm.reg = rx.value.reg;
             node.if_eq_imm.imm = (uint8_t)nn;
             strncpy(node.if_eq_imm.target, lbl.value.ident, 32);
+            if (is_goto == 1) { node.if_eq_imm.call_or_goto = 1; } else { node.if_eq_imm.call_or_goto = 0; }
         }
 
     } else {
@@ -340,7 +357,8 @@ static ASTNode parse_key_branch(Parser *p, int line, ASTNodeType type) {
     node.type = type;
     node.line = line;
     Token r = expect(p, TOKEN_REGISTER);
-    expect(p, TOKEN_GOTO);
+    Token check_token = expect_either(p, TOKEN_GOTO, TOKEN_CALL);
+    if (check_token.type == TOKEN_GOTO) { node.key.call_or_goto = 1; } else {node.key.call_or_goto = 0; }
     Token lbl = expect(p, TOKEN_IDENT);
     node.key.reg = r.value.reg;
     strncpy(node.key.target, lbl.value.ident, 32);

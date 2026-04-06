@@ -62,6 +62,11 @@ if vX != vY goto label        # jump if vX not equals vY
 ```
 call label                    # call subroutine
 ret                           # return from subroutine
+
+if vX == N  goto label        # call if vX equals immediate
+if vX == vY goto label        # call if vX equals vY
+if vX != N  goto label        # call if vX not equals immediate
+if vX != vY goto label        # call if vX not equals vY
 ```
  
 ## Input
@@ -73,6 +78,9 @@ waitkey vX          # block until any key pressed; store key index in vX
  
 ifkey  vX goto label    # jump if key[vX] is currently pressed
 ifnkey vX goto label    # jump if key[vX] is currently NOT pressed
+
+ifkey  vX call label    # call if key[vX] is currently pressed
+ifnkey vX call label    # call if key[vX] is currently NOT pressed
 ```
  
 ---
