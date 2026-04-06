@@ -3,3 +3,4 @@ build
 c8l
 *.c8l
 *.rom
+!/docs/SURVIVE.c8l

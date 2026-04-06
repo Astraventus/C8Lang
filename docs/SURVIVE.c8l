@@ -1,0 +1,424 @@
+# CHIP-8 keypad layout:
+#   1 2 3 C
+#   4 5 6 D
+#   7 8 9 E
+#   A 0 B F
+
+#   Register map:
+#       v0 - player x
+#       v1 - player y
+#       v2 - global animation (0 or 1)
+#       v3 - Game timer! / timer for starting screen
+#       v4 - constant 1
+#       v5 - direction (0=UP, 1=RIGHT, 2=DOWN, 3=LEFT, 4=IDLE)
+#       v6 - key scratch / frame delay value
+#       v7 - frame timer scratch
+#       v8 - enemy direction (0=UP, 1=RIGHT, 2=DOWN, 3=LEFT)
+#       v9 - delayget 
+#       vA - enemy x 
+#       vB - enemy y
+#       vC - for calculation
+#       vD - dash (5 pixels)
+#       vE - for calculation
+#       vF
+
+# === CONSTANTS ===
+v4 = 1
+v6 = 4
+v2 = 0          # Initialize animation state
+
+goto game_init
+
+# ==================
+#   SPRITES
+# ==================
+
+# === ENTITIES ===
+
+sprite player_00 {
+    0b00100000
+    0b11111000
+    0b10101000
+    0b10100000
+    0b00100000
+    0b01010000
+    0b00010000
+}
+
+sprite player_01 {
+    0b00100000
+    0b11111000
+    0b10101000
+    0b00101000
+    0b00100000
+    0b01010000
+    0b01000000
+}
+
+sprite enemy_00 {
+    0b00010000
+    0b00111000
+    0b00111000
+    0b01101100
+    0b10101010
+    0b10101010
+    0b10001000    
+}
+
+sprite enemy_01 {
+    0b00101000
+    0b00111000
+    0b00111000
+    0b01101100
+    0b10101010
+    0b10101010
+    0b00100010    
+}
+
+# === STARTING SCREEN ===
+
+sprite survive_00 {
+    0b01101010
+    0b10001010
+    0b10001010
+    0b10001010
+    0b01101010
+    0b00101010
+    0b00101010
+    0b00101010
+    0b00101010
+    0b11001110
+}
+
+sprite survive_01 {
+    0b11001010
+    0b10101010
+    0b10101010
+    0b11001010
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10100100
+}
+
+sprite survive_02 {
+    0b10101011
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10101011
+    0b10101010
+    0b10101010
+    0b10101010
+    0b10010011
+}
+
+sprite survive_03 {
+    0b10000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+}
+
+# === WIN ===
+
+# TODO
+
+# === LOSE ===
+
+# TODO
+
+# ==================
+#   CORE GAMELOOP
+# ==================
+
+game_init:
+    # start_screen
+    goto game_start_screen
+    game_init_after_screen:
+    cls
+    # timer
+    v3 = 255
+    # player
+    v0 = 28
+    v1 = 56
+    # enemy
+    vA = 8
+    vB = 4
+    goto gameloop
+
+gameloop:
+    call animation_reset
+    animation_back:
+    
+    v7 = 4
+    delayset v7
+    wait_frame:
+        delayget v9
+        if v9 != 0 goto wait_frame
+
+    if vF != 1 goto game_timer_skip
+        v3 -= v4
+    game_timer_skip:
+    if v3 == 0 goto game_halt
+
+    call handle_input
+    call update_player
+    call seek_player
+    call update_enemy
+
+    call draw_main
+
+    goto gameloop
+
+
+# ==================
+#  PLAYER MOVEMENT
+# ==================
+
+handle_input:
+    v6 = 2
+    ifkey v6 goto set_up
+    v6 = 6
+    ifkey v6 goto set_right
+    v6 = 8
+    ifkey v6 goto set_down
+    v6 = 4
+    ifkey v6 goto set_left
+    v6 = 5
+    ifkey v6 goto set_dash
+    call set_idle
+    ret
+
+set_up:    v5 = 0   
+            ret
+set_right: v5 = 1   
+            ret
+set_down:  v5 = 2   
+            ret
+set_left:  v5 = 3   
+            ret
+set_dash:  v5 = 5
+            ret
+set_idle:  v5 = 4
+            ret
+
+update_player:
+    if v5 == 0 goto p_up
+    if v5 == 1 goto p_right
+    if v5 == 2 goto p_down
+    if v5 == 3 goto p_left
+    if v5 == 5 goto p_dash
+    goto p_idle
+
+p_up:    v1 -= v4
+         vD = 0 
+         ret
+p_right: v0 += v4
+         vD = 1
+         ret
+p_down:  v1 += v4
+         vD = 2
+         ret
+p_left:  v0 -= v4
+         vD = 3
+         ret
+p_dash:  
+    if vD == 0 goto dash_up
+    if vD == 1 goto dash_right
+    if vD == 2 goto dash_down
+    goto dash_left
+
+dash_up:    v1 -= v4
+            v1 -= v4
+            v1 -= v4
+            v1 -= v4
+            v1 -= v4
+            ret
+dash_right: v0 += 5
+            ret
+dash_down:  v1 += 5
+            ret
+dash_left:  v0 -= v4
+            v0 -= v4
+            v0 -= v4
+            v0 -= v4
+            v0 -= v4
+            ret
+
+p_idle:
+    ret
+# ==================
+#   DRAW
+# ==================
+
+draw_main:
+    cls
+    call check_collision
+    call draw_player
+    call draw_enemy
+    ret
+
+draw_player:
+    call player_animation
+    draw v0 v1 7
+    ret
+
+draw_enemy:
+    call enemy_animation
+    draw vA vB 7
+    ret
+
+draw_start_screen:
+    # vC - X, vE - Y
+    vC = 20
+    vE = 12
+    I = survive_00
+    draw vC vE 10
+    vC += 8
+    I = survive_01
+    draw vC vE 10
+    vC += 8
+    I = survive_02
+    draw vC vE 10
+    vC += 6
+    I = survive_03
+    draw vC vE 10
+    vC += 8
+    ret
+
+# ==================
+#   ANIMATION
+# ==================
+
+animation_reset:
+    if v2 == 1 goto animation_switch_0
+    if v2 == 0 goto animation_switch_1
+    ret
+
+animation_switch_0:
+    v2 = 0
+    ret
+
+animation_switch_1:
+    v2 = 1
+    ret
+
+player_animation:
+    if v2 == 0 goto set_anim_1
+    I = player_00
+    ret
+    set_anim_1:
+        I = player_01 
+        ret
+
+enemy_animation:
+    if v2 == 0 goto set_en_anim_1
+    I = enemy_00
+    ret
+    set_en_anim_1:
+        I = enemy_01 
+        ret
+
+# ==================
+#   COLLISION
+# ==================
+
+check_collision:
+    if v0 == vA goto final_check
+    ret
+    final_check:
+    if v1 == vB goto game_halt
+    ret
+
+# ==================
+#   ENEMY AI
+# ==================
+
+seek_player:
+    seek_x:
+    # Let's use long forgotten discrete math knowledge
+    # (a < b) | (a -= b) | vF == 0 
+    # (a >= b) | (a -= b) | vF == 1
+    # (a > b) | (b -= a) | vF == 0
+    # (a <= b) | (b -= a) | vF == 1
+    # The algorithm is dirt simple - enemy first seek player by x coordinate, then by y until catches him
+    # a (vC) - is player, b (vA, vB) - is enemy
+    vC = v0
+    if vC == vA goto seek_y
+    vC -= vA
+    vE = vF
+    if vE == 0 goto enemy_set_left
+    if vE == 1 goto enemy_set_right
+    seek_y:
+        vC = v1
+        vC -= vB
+        vE = vF
+        if vE == 0 goto enemy_set_up
+        if vE == 1 goto enemy_set_down
+    seek_done:
+        ret
+
+
+# ==================
+#   ENEMY MOVEMENT
+# ==================
+
+enemy_set_up:    v8 = 0   
+            ret
+enemy_set_right: v8 = 1   
+            ret
+enemy_set_down:  v8 = 2   
+            ret
+enemy_set_left:  v8 = 3   
+            ret
+
+update_enemy:
+    if v8 == 0 goto e_up
+    if v8 == 3 goto e_left
+    if v8 == 2 goto e_down
+    goto e_right
+
+e_up:    vB -= v4
+         vB -= v4 
+            ret
+e_right: vA += v4   
+         vA += v4 
+            ret
+e_down:  vB += v4 
+         vB += v4   
+            ret
+e_left:  vA -= v4
+         vA -= v4
+            ret
+
+# ==================
+#   GAME END AND START
+# ==================
+
+game_start_screen:
+    v3 = 50
+    call draw_start_screen
+    game_start_screen_POINT_1:
+    v7 = 4
+    delayset v7
+    wait_frame_minor:
+        delayget v9
+        if v9 != 0 goto wait_frame_minor
+    v3 -= v4
+    if v3 == 0 goto game_init_after_screen
+    goto game_start_screen_POINT_1
+
+
+game_halt:
+    cls
+    goto game_halt

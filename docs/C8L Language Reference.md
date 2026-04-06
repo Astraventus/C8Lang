@@ -3,6 +3,8 @@
 C8L is a compiled language targeting the CHIP-8 virtual machine.
 Programs compile to a binary ROM loaded at address `0x200`.
 All values are 8-bit. Registers are `v0`–`vF`. Addresses are 12-bit.
+
+For an example of working code examine "SURVIVE.c8l" game in this docs folder.
  
 ---
  
