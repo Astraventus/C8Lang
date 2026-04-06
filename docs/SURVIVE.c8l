@@ -133,9 +133,25 @@ sprite survive_03 {
 
 # TODO
 
+sprite win {
+    0b10000010
+    0b10000010
+    0b10010010
+    0b10010010
+    0b11111110
+}
+
 # === LOSE ===
 
 # TODO
+
+sprite lose {
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b11111100
+}
 
 # ==================
 #   CORE GAMELOOP
@@ -147,7 +163,7 @@ game_init:
     game_init_after_screen:
     cls
     # timer
-    v3 = 255
+    v3 = 100
     # player
     v0 = 28
     v1 = 56
@@ -166,10 +182,10 @@ gameloop:
         delayget v9
         if v9 != 0 goto wait_frame
 
-    if vF != 1 goto game_timer_skip
+    if v2 != 0 goto game_timer_skip
         v3 -= v4
     game_timer_skip:
-    if v3 == 0 goto game_halt
+    if v3 == 0 goto game_halt_win
 
     call handle_input
     call update_player
@@ -296,6 +312,20 @@ draw_start_screen:
     vC += 8
     ret
 
+draw_win:
+    vC = 20
+    vE = 12
+    I = win
+    draw vC vE 5
+    ret
+
+draw_lose:
+    vC = 20
+    vE = 12
+    I = lose
+    draw vC vE 5
+    ret
+
 # ==================
 #   ANIMATION
 # ==================
@@ -334,10 +364,38 @@ enemy_animation:
 # ==================
 
 check_collision:
-    if v0 == vA goto final_check
+    vC = vA
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
+    vC += 1
+    if v0 == vC goto final_check
     ret
     final_check:
-    if v1 == vB goto game_halt
+    vE = vB
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
+    vE += 1
+    if v1 == vE goto game_halt_lose
     ret
 
 # ==================
@@ -418,7 +476,14 @@ game_start_screen:
     if v3 == 0 goto game_init_after_screen
     goto game_start_screen_POINT_1
 
-
-game_halt:
+game_halt_win:
     cls
-    goto game_halt
+    call draw_win
+    point_01:
+    goto point_01
+
+game_halt_lose:
+    cls
+    call draw_lose
+    point_02:
+    goto point_02
